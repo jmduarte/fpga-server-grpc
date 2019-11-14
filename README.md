@@ -1,11 +1,13 @@
-# mnist-server-grpc
+# fpga-server-grpc
 
-Build image:
+To set up server (from `prp-gpu-1.t2.ucsd.edu`):
 ```
-docker build -t jduarte1/mnist-server-grpc:1.0 .
+source /xilinx/Vivado/2019.2/settings64.sh
+source /opt/xilinx/xrt/setup.sh
+python3 server.py &
 ```
 
-Run server:
+To run client (from anywhere):
 ```
-docker run -t --rm -p 50051:50051 -v "$PWD" jduarte1/mnist-server-grpc:1.0 &
+python3 client-wait.py
 ```
