@@ -1,1 +1,1 @@
-ailab01.fnal.gov
+prp-gpu-1.t2.ucsd.edu
