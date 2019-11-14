@@ -12,7 +12,7 @@ if IP[-1] == '\n':
     IP = IP[:-1]
 f.close()
 
-def run():
+def run(max_events=32):
     # Get a handle to the server
     channel = grpc.insecure_channel(IP+':'+PORT)
     stub = server_tools_pb2_grpc.MnistServerStub(channel)
@@ -26,15 +26,8 @@ def run():
     client_id = response.new_id
 
     # Load the image from image.bmp
-    image = open('image.bmp', 'rb')
-    b = image.read()[54:]# Remove header
-    image.close()
-    assert(len(b)==28*28*3)# Make sure the image has no transparency and is 28x28
-    data = np.ndarray((1, 28, 28, 1))
-    for y in range(28):
-        for x in range(28):
-            i = 3*(28*y+x)
-            data[0][27-y][x][0] = 1 - (int(b[i])+int(b[i+1])+int(b[i+2])) / 3 / 255
+    data = np.loadtxt('tb_input_features.dat')
+    data = data[:max_events,:]
     data = data.tostring()
 
     # Pass the data to the server and receive a prediction
@@ -43,7 +36,7 @@ def run():
     response = stub.StartJobWait(server_tools_pb2.DataMessage(images=data, client_id = client_id, batch_size=32))
 
     # Find the most likely prediction and print it
-    original_array = np.frombuffer(response.prediction).reshape(1, 10)
+    original_array = np.frombuffer(response.prediction).reshape(max_events, 1)
     whole_time = time.time() - start_time
     result = list(original_array[0])
     print("Prediction is:", result.index(max(result)))
@@ -56,5 +49,5 @@ def run():
 if __name__ == '__main__':
     logging.basicConfig()
     # Repeat so that you can change the image
-    while input('Change image.bmp if you like') == '':
-        run()
+    while input('Run? ') == '':
+        run(max_events = 32)

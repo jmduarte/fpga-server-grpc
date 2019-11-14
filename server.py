@@ -43,7 +43,7 @@ class MnistServer(server_tools_pb2_grpc.MnistServerServicer):
         if not verify_request(request):
             return server_tools_pb2.PredictionMessage(complete=False, prediction=b'', error='Invalid data package', infer_time=0)
         data = np.frombuffer(request.images)
-        data = data.reshape(-1, 28, 28, 1)
+        data = data.reshape(-1, 11)
         prediction, predict_time = ml.predict(data, request.batch_size)
         return server_tools_pb2.PredictionMessage(complete=True, prediction=prediction.tostring(), error='', infer_time=predict_time)
 
@@ -69,7 +69,7 @@ class MnistServer(server_tools_pb2_grpc.MnistServerServicer):
             return server_tools_pb2.IDMessage(new_id=None, error = "The ID "+str(request.client_id)+" is not a valid client ID")
         
         data = np.frombuffer(request.images)
-        data = data.reshape(-1, 28, 28, 1)
+        data = data.reshape(-1, 11)
 
         job_id = request.client_id + '-' + str(max_client_ids[request.client_id])
         max_client_ids[request.client_id] += 1

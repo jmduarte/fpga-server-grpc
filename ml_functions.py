@@ -1,6 +1,8 @@
 import tensorflow as tf
 from keras.models import load_model
 import keras.backend as K
+import numpy as np
+import os
 
 from tensorflow.python.util import deprecation
 deprecation._PRINT_DEPRECATION_WARNINGS = False
@@ -9,24 +11,12 @@ import time, threading
 
 lock = threading.Lock()
 
-global model, model_loaded
-model = None
-model_loaded = False
-
-def get_model():
-    global model, model_loaded
-    if not model_loaded:
-        print("LOADING")
-        model = load_model("mnist-cnn.h5")
-        model_loaded = True
-    return model
-
 def predict(data, batch_size, results=None, times=None, job_id=None):
     lock.acquire()
+    np.savetxt('src/tb_data/tb_input_features.dat', data)
     start_time = time.time()
-    model = get_model()
-    with tf.device('/gpu:0'):
-        predictions = model.predict(data, batch_size=batch_size).astype(float)
+    os.system('./host %i'%int(data.shape[0]/batch_size))
+    predictions = np.loadtxt('tb_output_data.dat')
     predict_time = time.time() - start_time
     lock.release()
     if results is not None and job_id is not None:
