@@ -5,6 +5,9 @@ import numpy as np
 import server_tools_pb2
 import server_tools_pb2_grpc
 
+import keras
+from keras.models import model_from_json
+
 PORT = '50051'
 f = open("IP.txt")
 IP = f.read()
@@ -25,9 +28,15 @@ def run(max_events=32):
         return
     client_id = response.new_id
 
-    # Load the image from image.bmp
-    data = np.loadtxt('tb_input_features.dat')
+    with open('hcal_dense_1.json') as f:
+        json_string = f.read()
+    model = model_from_json(json_string)
+    model.load_weights('hcal_dense_1_weights.h5')
+
+    # Make up some input data:
+    data = np.random.rand(max_events,11)*100.
     data = data[:max_events,:]
+    expected = model.predict(data)
     data = data.tostring()
 
     # Pass the data to the server and receive a prediction
@@ -35,11 +44,11 @@ def run(max_events=32):
     start_time=time.time()
     response = stub.StartJobWait(server_tools_pb2.DataMessage(images=data, client_id = client_id, batch_size=32))
 
-    # Find the most likely prediction and print it
+    # Find the prediction and print it
     original_array = np.frombuffer(response.prediction).reshape(max_events, 1)
     whole_time = time.time() - start_time
-    result = list(original_array[0])
-    print("Prediction is:", result.index(max(result)))
+    print("Expected prediction is:", list(expected.reshape(-1)))
+    print("Quantized prediction is:", list(original_array.reshape(-1)))
     print("Total time:", whole_time)
     print("Predict time:", response.infer_time)
     print("Fraction of time spent not predicting:", (1 - response.infer_time / whole_time) * 100, '%')
