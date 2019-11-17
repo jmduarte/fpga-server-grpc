@@ -59,4 +59,4 @@ if __name__ == '__main__':
     logging.basicConfig()
     # Repeat so that you can change the image
     while input('Run? ') == '':
-        run(max_events = 32)
+        run(max_events = 16384)
