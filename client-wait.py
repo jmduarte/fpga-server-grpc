@@ -42,7 +42,7 @@ def run(max_events=32):
     # Pass the data to the server and receive a prediction
     print("Submitting image and waiting")
     start_time=time.time()
-    response = stub.StartJobWait(server_tools_pb2.DataMessage(images=data, client_id = client_id, batch_size=32))
+    response = stub.StartJobWait(server_tools_pb2.DataMessage(images=data, client_id = client_id, batch_size=16384))
 
     # Find the prediction and print it
     original_array = np.frombuffer(response.prediction).reshape(max_events, 1)
