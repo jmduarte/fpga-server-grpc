@@ -7,6 +7,17 @@ source /opt/xilinx/xrt/setup.sh
 python3 server.py &
 ```
 
+To build server from Docker:
+```
+docker build -t fpga-server-grpc .
+```
+
+To run server from Docker:
+```
+export PORT=50051
+./docker_run_xilinx.sh -p ${PORT}:${PORT} -e FPGA_SERVER_PORT=${PORT} -v ${PWD}:/app fpga-server-grpc
+```
+
 To run client (from anywhere):
 ```
 python3 client-wait.py
