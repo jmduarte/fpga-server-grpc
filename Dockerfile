@@ -1,18 +1,18 @@
+FROM ubuntu:18.04
 
-# Use the official Python image.
-# https://hub.docker.com/_/python
-FROM python:3.7
+RUN apt-get -y update
+RUN apt-get -y install wget
+RUN wget https://www.xilinx.com/bin/public/openDownload?filename=xrt_201920.2.3.1301_18.04-xrt.deb -O xrt_201920.2.3.1301_18.04-xrt.deb
 
-# Copy local code to the container image.
+RUN apt-get -y install /xrt_201920.2.3.1301_18.04-xrt.deb 
+
 ENV APP_HOME /app
 WORKDIR $APP_HOME
-COPY . .
 
 # Install production dependencies.
 # RUN pip install gunicorn
-RUN pip install grpcio
-RUN pip install tensorflow
-RUN pip install keras
+RUN apt-get -y install python3-pip
+RUN pip3 install grpcio tensorflow keras
 
 # Run the web service on container startup. Here we use the gunicorn
 # webserver, with one worker process and 8 threads.
@@ -22,5 +22,5 @@ RUN pip install keras
 #CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 app:app
 
 #EXPOSE 50051
-
-CMD ["python", "./server.py"]
+COPY go.sh /go.sh
+CMD /go.sh

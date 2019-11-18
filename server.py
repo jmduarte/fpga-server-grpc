@@ -13,8 +13,11 @@
 # limitations under the License.
 
 from concurrent import futures
+from optparse import OptionParser
+
 import logging, grpc, time
 import numpy as np
+import os
 import ml_functions as ml
 import threading
 
@@ -22,7 +25,6 @@ import server_tools_pb2
 import server_tools_pb2_grpc
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
-PORT='50051'
 
 global processes, max_id, results, max_client_ids, max_client_id, new_client_permitted, times
 processes = {}
@@ -99,6 +101,7 @@ def serve():
     server_tools_pb2_grpc.add_MnistServerServicer_to_server(MnistServer(), server)
     server.add_insecure_port('[::]:'+PORT)
     server.start()
+    print(f"Listening on port {PORT}")
     print("READY")
     try:
         while True:
@@ -110,4 +113,8 @@ def serve():
 
 if __name__ == '__main__':
     logging.basicConfig()
+    parser = OptionParser()
+    parser.add_option("-p", "--port", dest="PORT", default='50051')
+    (options, args) = parser.parse_args()
+    PORT = os.getenv("FPGA_SERVER_PORT", options.PORT)
     serve()

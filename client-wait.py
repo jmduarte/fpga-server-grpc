@@ -1,19 +1,14 @@
 import logging, grpc, time
 
 import numpy as np
+from optparse import OptionParser
 
+import os
 import server_tools_pb2
 import server_tools_pb2_grpc
 
 import keras
 from keras.models import model_from_json
-
-PORT = '50051'
-f = open("IP.txt")
-IP = f.read()
-if IP[-1] == '\n':
-    IP = IP[:-1]
-f.close()
 
 def run(max_events=32):
     # Get a handle to the server
@@ -57,6 +52,14 @@ def run(max_events=32):
 
 if __name__ == '__main__':
     logging.basicConfig()
+    parser = OptionParser()
+    parser.add_option("-p", "--port", dest="PORT", default='50051')
+    parser.add_option("-s", "--server", dest="IP", default='prp-gpu-1.t2.ucsd.edu')
+    (options, args) = parser.parse_args()
+
+    PORT = os.getenv("FPGA_SERVER_PORT", options.PORT)
+    IP = os.getenv("FPGA_SERVER_NAME", options.IP)
+
     # Repeat so that you can change the image
     while input('Run? ') == '':
         run(max_events = 16384)
